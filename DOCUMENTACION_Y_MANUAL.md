@@ -1,4 +1,4 @@
-# PintaPro — Documentación Técnica de Actualizaciones
+# CromaHogar — Documentación Técnica de Actualizaciones
 
 **Fecha de actualización:** 18 de febrero de 2026
 **Versión del Proyecto:** 2.0.0 (PWA Ready)
@@ -35,7 +35,7 @@ Se ha añadido un botón de ayuda (`?`) en la cabecera para facilitar el uso des
 
 ---
 
-# PintaPro — Manual de Usuario Actualizado
+# CromaHogar — Manual de Usuario Actualizado
 
 ## Guía Rápida de Uso
 

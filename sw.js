@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pintapro-v2';
+const CACHE_NAME = 'cromahogar-v2';
 const ASSETS = [
   './',
   './index.html',

@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PintaPro — Presupuestos</title>
+<title>CromaHogar — Presupuestos</title>
 <!-- PWA Meta Tags -->
 <meta name="theme-color" content="#2C2825">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="PintaPro">
+<meta name="apple-mobile-web-app-title" content="CromaHogar">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 
@@ -725,7 +725,7 @@
 <!-- APP HEADER -->
 <header class="app-header">
   <div class="app-logo">
-    <div class="logo-icon" aria-label="Logo PintaPro">
+    <div class="logo-icon" aria-label="Logo CromaHogar">
       <svg viewBox="0 0 32 32" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="2" y="2" width="28" height="28" rx="8" fill="#B8724A"/>
         <rect x="8" y="20" width="16" height="4" rx="2" fill="#F2EEE8"/>
@@ -735,7 +735,7 @@
       </svg>
     </div>
     <div>
-      <div class="logo-text">PintaPro</div>
+      <div class="logo-text">CromaHogar</div>
       <div class="logo-sub">Presupuestos Profesionales</div>
     </div>
   </div>
@@ -1357,12 +1357,12 @@ function loadLogo(event) {
 // ============================================================
 function getSavedBudgets() {
   try {
-    return JSON.parse(localStorage.getItem('pintapro_budgets') || '[]');
+    return JSON.parse(localStorage.getItem('cromahogar_budgets') || '[]');
   } catch { return []; }
 }
 
 function saveBudgets(budgets) {
-  localStorage.setItem('pintapro_budgets', JSON.stringify(budgets));
+  localStorage.setItem('cromahogar_budgets', JSON.stringify(budgets));
 }
 
 // Persistencia de datos de empresa
@@ -1375,11 +1375,11 @@ function saveCompanyInfo() {
     email: document.getElementById('empEmail').value,
     logo: logoDataUrl
   };
-  localStorage.setItem('pintapro_company', JSON.stringify(company));
+  localStorage.setItem('cromahogar_company', JSON.stringify(company));
 }
 
 function loadCompanyInfo() {
-  const company = JSON.parse(localStorage.getItem('pintapro_company') || '{}');
+  const company = JSON.parse(localStorage.getItem('cromahogar_company') || '{}');
   if (company.nombre) document.getElementById('empNombre').value = company.nombre;
   if (company.nif) document.getElementById('empNif').value = company.nif;
   if (company.direccion) document.getElementById('empDireccion').value = company.direccion;
@@ -1708,7 +1708,7 @@ async function generatePDF() {
     doc.setTextColor(150, 140, 130);
     doc.setFontSize(7);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Presupuesto ${data.num} · Generado por PintaPro`, m, 292);
+    doc.text(`Presupuesto ${data.num} · Generado por CromaHogar`, m, 292);
     doc.text(`Página ${i} de ${pageCount}`, W - m, 292, { align: 'right' });
   }
 
