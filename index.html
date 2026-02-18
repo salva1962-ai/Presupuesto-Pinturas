@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PintaPro — Presupuestos</title>
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#2C2825">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PintaPro">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
@@ -1795,6 +1803,15 @@ function showNotification(msg, type = 'success') {
   el.className = `notification ${type} show`;
   clearTimeout(notifTimeout);
   notifTimeout = setTimeout(() => { el.classList.remove('show'); }, 3000);
+}
+
+// SW Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW Registered', reg))
+      .catch(err => console.log('SW Registration Failed', err));
+  });
 }
 </script>
 </body>
