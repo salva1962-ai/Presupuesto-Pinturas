@@ -1,8 +1,11 @@
-const CACHE_NAME = 'pintapro-v1';
+const CACHE_NAME = 'pintapro-v2';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-512-maskable.png'
 ];
 
 // Instalar el Service Worker y cachear activos
