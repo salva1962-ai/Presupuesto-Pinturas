@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PintaPro — Presupuestos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+<style>
+  :root {
+    --cream: #FAF8F5;
+    --cream2: #F2EEE8;
+    --cream3: #E8E2D9;
+    --charcoal: #2C2825;
+    --charcoal2: #4A4540;
+    --charcoal3: #6B6560;
+    --terra: #B8724A;
+    --terra-light: #D4956E;
+    --terra-pale: #F5EDE6;
+    --sage: #7A8C6E;
+    --sage-pale: #EDF0EA;
+    --success: #4A7C59;
+    --danger: #8C4A4A;
+    --border: #DDD7CE;
+    --shadow: 0 2px 12px rgba(44,40,37,0.08);
+    --shadow-lg: 0 8px 32px rgba(44,40,37,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .app-header {
+    background: var(--charcoal);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+  }
+
+  .app-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--terra);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .logo-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--terra);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--terra-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(184,114,74,0.3); }
+
+  .btn-secondary {
+    background: var(--cream2);
+    color: var(--charcoal);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--cream3); }
+
+  .btn-outline {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+  .btn-danger {
+    background: #FDF0F0;
+    color: var(--danger);
+    border: 1px solid #F0D5D5;
+  }
+  .btn-danger:hover { background: #F8DEDE; }
+
+  .btn-success {
+    background: var(--sage-pale);
+    color: var(--success);
+    border: 1px solid #C8DAC2;
+  }
+  .btn-success:hover { background: #DDF0D5; }
+
+  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+  .btn-icon { padding: 7px; border-radius: 6px; }
+
+  /* MAIN LAYOUT */
+  .main-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+  }
+
+  /* PAGE TITLE */
+  .page-title {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .page-title h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--charcoal);
+  }
+
+  .budget-badge {
+    background: var(--terra);
+    color: white;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* CARD */
+  .card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .card-header {
+    background: var(--cream2);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    color: var(--charcoal);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--terra-pale);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--terra);
+    font-size: 14px;
+  }
+
+  .card-body { padding: 24px; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+
+  /* FORM ELEMENTS */
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--charcoal3);
+  }
+
+  input[type="text"], input[type="number"], input[type="date"],
+  select, textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--charcoal);
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 13px;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--terra);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(184,114,74,0.1);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236B6560'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px; }
+
+  /* TAX CONTROL */
+  .tax-control {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .tax-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .tax-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--charcoal3);
+  }
+
+  .tax-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .tax-badge.igic { background: #E8F3E8; color: var(--success); }
+  .tax-badge.iva { background: var(--terra-pale); color: var(--terra); }
+  .tax-badge.exempt { background: var(--cream3); color: var(--charcoal3); }
+
+  .tax-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* TOGGLE */
+  .toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    transition: 0.3s;
+    cursor: pointer;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .toggle input:checked + .toggle-slider { background: var(--terra); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  .toggle-label-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--charcoal2);
+  }
+
+  /* PRODUCTS TABLE */
+  .products-table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background: var(--cream2);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--charcoal3);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr { transition: background 0.15s; }
+  tbody tr:hover { background: var(--cream); }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+
+  tbody td { padding: 10px 14px; vertical-align: middle; }
+
+  .td-desc { min-width: 200px; }
+  .td-type { min-width: 120px; }
+  .td-qty { width: 80px; text-align: right; }
+  .td-price { width: 110px; text-align: right; }
+  .td-total { width: 110px; text-align: right; font-weight: 600; color: var(--charcoal); }
+  .td-actions { width: 90px; text-align: center; }
+
+  .type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .type-badge.material { background: var(--terra-pale); color: var(--terra); }
+  .type-badge.mano { background: var(--sage-pale); color: var(--sage); }
+
+  .inline-input {
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--charcoal);
+    padding: 4px 8px;
+    border-radius: 6px;
+    width: 100%;
+    transition: all 0.2s;
+  }
+
+  .inline-input:focus {
+    outline: none;
+    background: white;
+    box-shadow: 0 0 0 2px var(--terra);
+  }
+
+  .inline-input.text-right { text-align: right; }
+
+  .add-row {
+    padding: 12px 14px;
+    background: var(--cream);
+    border-top: 1px dashed var(--border);
+  }
+
+  /* TOTALS */
+  .totals-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    min-width: 300px;
+  }
+
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .totals-row:last-child { border-bottom: none; }
+
+  .totals-row .label { color: var(--charcoal3); }
+  .totals-row .amount { font-weight: 500; }
+
+  .totals-row.total-final {
+    padding-top: 14px;
+    margin-top: 6px;
+    border-top: 2px solid var(--charcoal);
+    border-bottom: none;
+  }
+
+  .totals-row.total-final .label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--charcoal);
+  }
+
+  .totals-row.total-final .amount {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--terra);
+  }
+
+  .bottom-row {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .notes-section { flex: 1; min-width: 280px; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44,40,37,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    padding: 28px;
+    width: 100%;
+    max-width: 480px;
+    animation: modalIn 0.25s ease;
+  }
+
+  @keyframes modalIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* BUDGET LIST */
+  .budget-list-panel {
+    display: none;
+  }
+
+  .budget-list-panel.active { display: block; }
+  .budget-form-panel.hidden { display: none; }
+
+  .budget-list-table .tr-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .budget-list-table .tr-row:hover { background: var(--cream); }
+  .budget-list-table .tr-row.header {
+    background: var(--cream2);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--charcoal3);
+    border-bottom: 2px solid var(--border);
+  }
+
+  /* NOTIFICATION */
+  .notification {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--charcoal);
+    color: white;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 340px;
+  }
+
+  .notification.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .notification.success { border-left: 4px solid var(--success); }
+  .notification.error { border-left: 4px solid var(--danger); }
+
+  /* COMPANY LOGO UPLOAD */
+  .logo-upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--cream);
+  }
+
+  .logo-upload-area:hover { border-color: var(--terra); background: var(--terra-pale); }
+  .logo-upload-area img { max-height: 60px; max-width: 160px; object-fit: contain; }
+  .logo-upload-area .upload-hint { font-size: 12px; color: var(--charcoal3); margin-top: 6px; }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0 16px;
+    color: var(--charcoal3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .app-header { padding: 0 16px; }
+    .main-container { padding: 16px 12px 40px; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .card-body { padding: 16px; }
+    .bottom-row { flex-direction: column; }
+    .totals-card { width: 100%; }
+  }
+
+  .text-muted { color: var(--charcoal3); font-size: 12px; }
+  .number-field { font-variant-numeric: tabular-nums; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--charcoal3); }
+  .empty-state .big-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* PRINT PREVIEW */
+  @media print {
+    body { background: white; }
+    .app-header, .header-actions, .card-header .btn, .add-row, .td-actions, .btn { display: none !important; }
+  }
+
+  /* Utility Classes */
+  .mt-4 { margin-top: 4px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-20 { margin-top: 20px; }
+  .mb-6 { margin-bottom: 6px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-20 { margin-bottom: 20px; }
+  .p-0 { padding: 0; }
+  .p-32 { padding: 32px; }
+  .w-100 { width: 100%; }
+  .h-100 { height: 100%; }
+  .flex-column { display: flex; flex-direction: column; }
+  .gap-8 { gap: 8px; }
+  .gap-14 { gap: 14px; }
+  .text-center { text-align: center; }
+  .text-right { text-align: right; }
+  .justify-center { justify-content: center; }
+  .align-center { align-items: center; }
+  .flex { display: flex; }
+  .color-muted { color: var(--charcoal3); }
+  .color-terra { color: var(--terra); }
+  .fw-500 { font-weight: 500; }
+  .fw-600 { font-weight: 600; }
+  .fs-11 { font-size: 11px; }
+  .fs-16 { font-size: 16px; }
+  .fs-18 { font-size: 18px; }
+  .fs-28 { font-size: 28px; }
+  .fs-32 { font-size: 32px; }
+  .gap-4 { gap: 4px; }
+  .gap-6 { gap: 6px; }
+  .serif { font-family: 'DM Serif Display', serif; }
+  .border-bottom { border-bottom: 1px solid var(--border); }
+  .pb-12 { padding-bottom: 12px; }
+  .w-100 { width: 100%; }
+  .w-36 { width: 36px; }
+  .hidden { display: none !important; }
+  .budget-num-input {
+    background: var(--cream2);
+    font-weight: 600;
+    color: var(--terra);
+  }
+</style>
+</head>
+<body>
+
+<!-- APP HEADER -->
+<header class="app-header">
+  <div class="app-logo">
+    <div class="logo-icon">🖌️</div>
+    <div>
+      <div class="logo-text">PintaPro</div>
+      <div class="logo-sub">Presupuestos Profesionales</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline" onclick="showBudgetList()">📋 Mis Presupuestos</button>
+    <button class="btn btn-primary" onclick="newBudget()">＋ Nuevo Presupuesto</button>
+  </div>
+</header>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification"></div>
+
+<!-- MODAL: AÑADIR/EDITAR LÍNEA -->
+<div class="modal-overlay" id="lineModal">
+  <div class="modal">
+    <h3 id="lineModalTitle">➕ Añadir Línea</h3>
+    <div class="flex-column gap-14">
+      <div class="form-group">
+        <label>Descripción *</label>
+        <input type="text" id="lineDesc" placeholder="Ej: Pintura interior habitaciones..." />
+      </div>
+      <div class="form-group">
+        <label>Tipo de Producto</label>
+        <select id="lineType">
+          <option value="material">🪣 Material</option>
+          <option value="mano">👷 Mano de Obra</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Cantidad *</label>
+          <input type="number" id="lineQty" min="0.01" step="0.01" value="1" placeholder="1" />
+        </div>
+        <div class="form-group">
+          <label>Precio Unitario (€) *</label>
+          <input type="number" id="linePrice" min="0" step="0.01" value="0" placeholder="0.00" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeLineModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveLineModal()">Guardar Línea</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div class="main-container">
+
+  <!-- BUDGET LIST PANEL -->
+  <div class="budget-list-panel" id="budgetListPanel">
+    <div class="page-title">
+      <h1>Mis Presupuestos</h1>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h2><span class="card-icon">📋</span> Historial de Presupuestos</h2>
+        <button class="btn btn-primary btn-sm" onclick="newBudget()">＋ Nuevo</button>
+      </div>
+      <div id="budgetListContent"></div>
+    </div>
+  </div>
+
+  <!-- BUDGET FORM PANEL -->
+  <div class="budget-form-panel" id="budgetFormPanel">
+    <div class="page-title">
+      <h1>Nuevo Presupuesto</h1>
+      <span class="budget-badge" id="budgetNumberBadge">Nº —</span>
+    </div>
+
+    <!-- EMPRESA -->
+    <div class="card">
+      <div class="card-header">
+        <h2><span class="card-icon">🏢</span> Datos de la Empresa</h2>
+      </div>
+      <div class="card-body">
+        <div class="grid-2 mb-16">
+          <div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Nombre Empresa *</label>
+                <input type="text" id="empNombre" placeholder="Pinturas García S.L." />
+              </div>
+              <div class="form-group">
+                <label>NIF / CIF</label>
+                <input type="text" id="empNif" placeholder="B12345678" />
+              </div>
+            </div>
+            <div class="form-group mt-12">
+              <label>Dirección</label>
+              <input type="text" id="empDireccion" placeholder="Calle Ejemplo, 12, 28001 Madrid" />
+            </div>
+            <div class="grid-2 mt-12">
+              <div class="form-group">
+                <label>Teléfono</label>
+                <input type="text" id="empTel" placeholder="600 000 000" />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="text" id="empEmail" placeholder="info@empresa.com" />
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Logotipo</label>
+            <div class="logo-upload-area" onclick="document.getElementById('logoInput').click()" id="logoArea">
+              <div id="logoPreview">
+                <div class="mb-6 fs-32">🖼️</div>
+                <div class="upload-hint">Haz clic para subir tu logo</div>
+                <div class="upload-hint">PNG, JPG – recomendado 300×100px</div>
+              </div>
+            </div>
+            <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="loadLogo(event)" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRESUPUESTO INFO -->
+    <div class="card">
+      <div class="card-header">
+        <h2><span class="card-icon">📄</span> Información del Presupuesto</h2>
+      </div>
+      <div class="card-body">
+        <div class="grid-4 mb-20">
+          <div class="form-group">
+            <label for="budgetNum">Nº Presupuesto</label>
+            <input type="text" id="budgetNum" readonly class="w-100 budget-num-input" />
+          </div>
+          <div class="form-group">
+            <label for="fechaEmision">Fecha Emisión</label>
+            <input type="date" id="fechaEmision" />
+          </div>
+          <div class="form-group">
+            <label for="fechaValidez">Válido Hasta</label>
+            <input type="date" id="fechaValidez" />
+          </div>
+          <div class="form-group">
+            <label for="provincia">Provincia</label>
+            <select id="provincia" onchange="updateTax()">
+              <option value="">— Seleccionar —</option>
+              <optgroup label="🏝 Canarias (IGIC 7%)">
+                <option value="Las Palmas">Las Palmas</option>
+                <option value="Santa Cruz de Tenerife">Santa Cruz de Tenerife</option>
+              </optgroup>
+              <optgroup label="🇪🇸 Península y Baleares (IVA 21%)">
+                <option value="Álava">Álava</option>
+                <option value="Albacete">Albacete</option>
+                <option value="Alicante">Alicante</option>
+                <option value="Almería">Almería</option>
+                <option value="Asturias">Asturias</option>
+                <option value="Ávila">Ávila</option>
+                <option value="Badajoz">Badajoz</option>
+                <option value="Barcelona">Barcelona</option>
+                <option value="Burgos">Burgos</option>
+                <option value="Cáceres">Cáceres</option>
+                <option value="Cádiz">Cádiz</option>
+                <option value="Cantabria">Cantabria</option>
+                <option value="Castellón">Castellón</option>
+                <option value="Ciudad Real">Ciudad Real</option>
+                <option value="Córdoba">Córdoba</option>
+                <option value="Cuenca">Cuenca</option>
+                <option value="Girona">Girona</option>
+                <option value="Granada">Granada</option>
+                <option value="Guadalajara">Guadalajara</option>
+                <option value="Guipúzcoa">Guipúzcoa</option>
+                <option value="Huelva">Huelva</option>
+                <option value="Huesca">Huesca</option>
+                <option value="Illes Balears">Illes Balears</option>
+                <option value="Jaén">Jaén</option>
+                <option value="La Rioja">La Rioja</option>
+                <option value="León">León</option>
+                <option value="Lleida">Lleida</option>
+                <option value="Lugo">Lugo</option>
+                <option value="Madrid">Madrid</option>
+                <option value="Málaga">Málaga</option>
+                <option value="Murcia">Murcia</option>
+                <option value="Navarra">Navarra</option>
+                <option value="Ourense">Ourense</option>
+                <option value="Palencia">Palencia</option>
+                <option value="Pontevedra">Pontevedra</option>
+                <option value="Salamanca">Salamanca</option>
+                <option value="Segovia">Segovia</option>
+                <option value="Sevilla">Sevilla</option>
+                <option value="Soria">Soria</option>
+                <option value="Tarragona">Tarragona</option>
+                <option value="Teruel">Teruel</option>
+                <option value="Toledo">Toledo</option>
+                <option value="Valencia">Valencia</option>
+                <option value="Valladolid">Valladolid</option>
+                <option value="Vizcaya">Vizcaya</option>
+                <option value="Zamora">Zamora</option>
+                <option value="Zaragoza">Zaragoza</option>
+              </optgroup>
+              <optgroup label="🪨 Sin impuesto (Ceuta/Melilla)">
+                <option value="Ceuta">Ceuta</option>
+                <option value="Melilla">Melilla</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- TAX CONTROL -->
+        <div class="tax-control">
+          <div class="tax-info">
+            <span class="tax-label">Régimen Fiscal</span>
+            <div class="mt-4 flex align-center gap-8">
+              <span class="tax-badge" id="taxBadge">— Selecciona provincia —</span>
+              <span class="text-muted" id="taxRateInfo"></span>
+            </div>
+          </div>
+          <div class="tax-controls-row">
+            <label class="toggle-wrap">
+              <span class="toggle-label-text">Exento de impuesto</span>
+              <div class="toggle">
+                <input type="checkbox" id="taxExempt" onchange="updateTax()" />
+                <div class="toggle-slider"></div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENTE -->
+    <div class="card">
+      <div class="card-header">
+        <h2><span class="card-icon">👤</span> Datos del Cliente</h2>
+      </div>
+      <div class="card-body">
+        <div class="grid-3">
+          <div class="form-group">
+            <label>Nombre / Empresa *</label>
+            <input type="text" id="cliNombre" placeholder="Cliente o empresa" />
+          </div>
+          <div class="form-group">
+            <label>NIF / DNI</label>
+            <input type="text" id="cliNif" placeholder="12345678A" />
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="text" id="cliTel" placeholder="600 111 222" />
+          </div>
+        </div>
+        <div class="grid-2 mt-12">
+          <div class="form-group">
+            <label>Dirección</label>
+            <input type="text" id="cliDireccion" placeholder="Calle, número, ciudad..." />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="text" id="cliEmail" placeholder="cliente@email.com" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LÍNEAS DE PRODUCTOS -->
+    <div class="card">
+      <div class="card-header">
+        <h2><span class="card-icon">🪣</span> Líneas de Productos y Servicios</h2>
+        <button class="btn btn-primary btn-sm" onclick="openLineModal()">＋ Añadir Línea</button>
+      </div>
+      <div class="card-body p-0">
+        <div class="products-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-center w-36">#</th>
+                <th class="td-desc">Descripción</th>
+                <th class="td-type">Tipo</th>
+                <th class="td-qty">Cantidad</th>
+                <th class="td-price">Precio Unit.</th>
+                <th class="td-total">Total</th>
+                <th class="td-actions">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="linesBody">
+              <tr id="emptyLinesRow">
+                <td colspan="7" class="text-center p-32 color-muted">
+                  <div class="mb-8 fs-28">🖌️</div>
+                  Añade la primera línea de presupuesto
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: NOTAS + TOTALES -->
+    <div class="bottom-row">
+      <div class="notes-section">
+        <div class="card h-100">
+          <div class="card-header">
+            <h2><span class="card-icon">📝</span> Notas y Condiciones</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Notas Adicionales</label>
+              <textarea id="notasPresupuesto" placeholder="Condiciones de pago, plazo de ejecución, materiales incluidos/excluidos, garantías..." rows="5"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="totals-card">
+        <div class="serif fs-18 mb-16 pb-12 border-bottom">Resumen</div>
+        <div class="totals-row">
+          <span class="label">Subtotal (sin impuesto)</span>
+          <span class="amount number-field" id="totalSubtotal">0,00 €</span>
+        </div>
+        <div class="totals-row" id="taxRow">
+          <span class="label" id="taxRowLabel">IVA (21%)</span>
+          <span class="amount number-field" id="totalTax">0,00 €</span>
+        </div>
+        <div class="totals-row total-final">
+          <span class="label">TOTAL</span>
+          <span class="amount number-field" id="totalFinal">0,00 €</span>
+        </div>
+        <div class="mt-20 flex-column gap-8">
+          <button class="btn btn-primary w-100 justify-center" onclick="generatePDF()">📄 Generar y Descargar PDF</button>
+          <button class="btn btn-secondary w-100 justify-center" onclick="saveBudget()">💾 Guardar Presupuesto</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end form panel -->
+</div><!-- end main-container -->
+
+<script>
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+let lines = [];
+let editingLineIndex = null;
+let currentBudgetIndex = null;
+let logoDataUrl = null;
+let taxRate = 0.21;
+let taxType = 'IVA';
+let taxExempt = false;
+
+const CANARY_PROVINCES = ['Las Palmas', 'Santa Cruz de Tenerife'];
+const NO_TAX_PROVINCES = ['Ceuta', 'Melilla'];
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+  loadCompanyInfo();
+  const today = new Date();
+  const validity = new Date(today);
+  validity.setDate(today.getDate() + 30);
+  document.getElementById('fechaEmision').value = toISO(today);
+  document.getElementById('fechaValidez').value = toISO(validity);
+  document.getElementById('budgetNum').value = generateBudgetNumber();
+  document.getElementById('budgetNumberBadge').textContent = 'Nº ' + document.getElementById('budgetNum').value;
+  updateTotals();
+  updateTax();
+  // Show form by default
+  document.getElementById('budgetFormPanel').style.display = 'block';
+  document.getElementById('budgetListPanel').style.display = 'none';
+});
+
+function toISO(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function generateBudgetNumber() {
+  const budgets = getSavedBudgets();
+  const year = new Date().getFullYear();
+  const num = String(budgets.length + 1).padStart(4, '0');
+  return `${year}-${num}`;
+}
+
+// ============================================================
+// TAX LOGIC
+// ============================================================
+function updateTax() {
+  const provincia = document.getElementById('provincia').value;
+  const exempt = document.getElementById('taxExempt').checked;
+  taxExempt = exempt;
+
+  const badge = document.getElementById('taxBadge');
+  const rateInfo = document.getElementById('taxRateInfo');
+  const taxRow = document.getElementById('taxRow');
+
+  if (exempt) {
+    taxRate = 0;
+    taxType = 'EXENTO';
+    badge.className = 'tax-badge exempt';
+    badge.textContent = '⚠️ Exento de Impuesto';
+    rateInfo.textContent = 'El presupuesto no incluirá impuesto';
+    taxRow.style.opacity = '0.4';
+    document.getElementById('taxRowLabel').textContent = 'Impuesto (0%)';
+  } else if (!provincia) {
+    taxRate = 0.21;
+    taxType = 'IVA';
+    badge.className = 'tax-badge iva';
+    badge.textContent = '— Selecciona provincia —';
+    rateInfo.textContent = '';
+    taxRow.style.opacity = '1';
+    document.getElementById('taxRowLabel').textContent = 'IVA (21%)';
+  } else if (NO_TAX_PROVINCES.includes(provincia)) {
+    taxRate = 0;
+    taxType = 'EXENTO';
+    badge.className = 'tax-badge exempt';
+    badge.textContent = '⚠️ Sin impuesto (IPSI)';
+    rateInfo.textContent = 'Ceuta y Melilla no aplican IVA ni IGIC';
+    taxRow.style.opacity = '0.4';
+    document.getElementById('taxRowLabel').textContent = 'Impuesto (0%)';
+  } else if (CANARY_PROVINCES.includes(provincia)) {
+    taxRate = 0.07;
+    taxType = 'IGIC';
+    badge.className = 'tax-badge igic';
+    badge.textContent = '🌴 IGIC';
+    rateInfo.textContent = 'Islas Canarias — 7%';
+    taxRow.style.opacity = '1';
+    document.getElementById('taxRowLabel').textContent = 'IGIC (7%)';
+  } else {
+    taxRate = 0.21;
+    taxType = 'IVA';
+    badge.className = 'tax-badge iva';
+    badge.textContent = '🇪🇸 IVA';
+    rateInfo.textContent = 'Península y Baleares — 21%';
+    taxRow.style.opacity = '1';
+    document.getElementById('taxRowLabel').textContent = 'IVA (21%)';
+  }
+
+  updateTotals();
+}
+
+// ============================================================
+// LINES MANAGEMENT
+// ============================================================
+function openLineModal(index = null) {
+  editingLineIndex = index;
+  const modal = document.getElementById('lineModal');
+  const title = document.getElementById('lineModalTitle');
+
+  if (index !== null) {
+    const line = lines[index];
+    title.textContent = '✏️ Editar Línea';
+    document.getElementById('lineDesc').value = line.desc;
+    document.getElementById('lineType').value = line.type;
+    document.getElementById('lineQty').value = line.qty;
+    document.getElementById('linePrice').value = line.price;
+  } else {
+    title.textContent = '➕ Añadir Línea';
+    document.getElementById('lineDesc').value = '';
+    document.getElementById('lineType').value = 'material';
+    document.getElementById('lineQty').value = '1';
+    document.getElementById('linePrice').value = '';
+  }
+
+  modal.classList.add('active');
+  document.getElementById('lineDesc').focus();
+}
+
+function closeLineModal() {
+  document.getElementById('lineModal').classList.remove('active');
+  editingLineIndex = null;
+}
+
+document.getElementById('lineModal').addEventListener('click', function(e) {
+  if (e.target === this) closeLineModal();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLineModal();
+});
+
+function saveLineModal() {
+  const desc = document.getElementById('lineDesc').value.trim();
+  const type = document.getElementById('lineType').value;
+  const qty = parseFloat(document.getElementById('lineQty').value);
+  const price = parseFloat(document.getElementById('linePrice').value);
+
+  if (!desc) { showNotification('⚠️ La descripción es obligatoria', 'error'); return; }
+  if (isNaN(qty) || qty <= 0) { showNotification('⚠️ La cantidad debe ser mayor a 0', 'error'); return; }
+  if (isNaN(price) || price < 0) { showNotification('⚠️ El precio no puede ser negativo', 'error'); return; }
+
+  const line = { desc, type, qty, price, total: qty * price };
+
+  if (editingLineIndex !== null) {
+    lines[editingLineIndex] = line;
+    showNotification('✅ Línea actualizada correctamente', 'success');
+  } else {
+    lines.push(line);
+    showNotification('✅ Línea añadida correctamente', 'success');
+  }
+
+  closeLineModal();
+  renderLines();
+  updateTotals();
+}
+
+function deleteLine(index) {
+  lines.splice(index, 1);
+  renderLines();
+  updateTotals();
+  showNotification('🗑️ Línea eliminada', 'success');
+}
+
+function renderLines() {
+  const tbody = document.getElementById('linesBody');
+  tbody.innerHTML = '';
+
+  if (lines.length === 0) {
+    tbody.innerHTML = `<tr id="emptyLinesRow"><td colspan="7" class="text-center p-32 color-muted">
+      <div class="fs-28 mb-8">🖌️</div>Añade la primera línea de presupuesto</td></tr>`;
+    return;
+  }
+
+  lines.forEach((line, i) => {
+    const typeBadge = line.type === 'material'
+      ? '<span class="type-badge material">🪣 Material</span>'
+      : '<span class="type-badge mano">👷 Mano de Obra</span>';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="text-center color-muted fs-11">${i + 1}</td>
+      <td class="td-desc">${escHtml(line.desc)}</td>
+      <td class="td-type">${typeBadge}</td>
+      <td class="td-qty number-field">${fmtNum(line.qty)}</td>
+      <td class="td-price number-field">${fmtEur(line.price)}</td>
+      <td class="td-total number-field">${fmtEur(line.total)}</td>
+      <td class="td-actions">
+        <div class="flex gap-4 justify-center">
+          <button class="btn btn-secondary btn-icon btn-sm" onclick="openLineModal(${i})" title="Editar">✏️</button>
+          <button class="btn btn-danger btn-icon btn-sm" onclick="deleteLine(${i})" title="Eliminar">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ============================================================
+// TOTALS
+// ============================================================
+function updateTotals() {
+  const subtotal = lines.reduce((s, l) => s + l.total, 0);
+  const tax = taxExempt ? 0 : subtotal * taxRate;
+  const total = subtotal + tax;
+
+  document.getElementById('totalSubtotal').textContent = fmtEur(subtotal);
+  document.getElementById('totalTax').textContent = fmtEur(tax);
+  document.getElementById('totalFinal').textContent = fmtEur(total);
+}
+
+// ============================================================
+// FORMAT HELPERS
+// ============================================================
+function fmtEur(n) {
+  return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+function fmtNum(n) {
+  return n.toLocaleString('es-ES', { minimumFractionDigits: n % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
+}
+
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(str));
+  return d.innerHTML;
+}
+
+// ============================================================
+// LOGO
+// ============================================================
+function loadLogo(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    logoDataUrl = e.target.result;
+    document.getElementById('logoPreview').innerHTML =
+      `<img src="${logoDataUrl}" alt="Logo" /><div class="upload-hint mt-6">Haz clic para cambiar</div>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ============================================================
+// SAVE / LOAD BUDGETS
+// ============================================================
+function getSavedBudgets() {
+  try {
+    return JSON.parse(localStorage.getItem('pintapro_budgets') || '[]');
+  } catch { return []; }
+}
+
+function saveBudgets(budgets) {
+  localStorage.setItem('pintapro_budgets', JSON.stringify(budgets));
+}
+
+// Persistencia de datos de empresa
+function saveCompanyInfo() {
+  const company = {
+    nombre: document.getElementById('empNombre').value,
+    nif: document.getElementById('empNif').value,
+    direccion: document.getElementById('empDireccion').value,
+    tel: document.getElementById('empTel').value,
+    email: document.getElementById('empEmail').value,
+    logo: logoDataUrl
+  };
+  localStorage.setItem('pintapro_company', JSON.stringify(company));
+}
+
+function loadCompanyInfo() {
+  const company = JSON.parse(localStorage.getItem('pintapro_company') || '{}');
+  if (company.nombre) document.getElementById('empNombre').value = company.nombre;
+  if (company.nif) document.getElementById('empNif').value = company.nif;
+  if (company.direccion) document.getElementById('empDireccion').value = company.direccion;
+  if (company.tel) document.getElementById('empTel').value = company.tel;
+  if (company.email) document.getElementById('empEmail').value = company.email;
+  if (company.logo) {
+    logoDataUrl = company.logo;
+    document.getElementById('logoPreview').innerHTML = `<img src="${logoDataUrl}" alt="Logo" /><div class="upload-hint mt-6">Haz clic para cambiar</div>`;
+  } else {
+    document.getElementById('logoPreview').innerHTML = `<div class="mb-6 fs-32">🖼️</div><div class="upload-hint">Haz clic para subir tu logo</div><div class="upload-hint">PNG, JPG – recomendado 300×100px</div>`;
+  }
+}
+
+function getBudgetData() {
+  return {
+    num: document.getElementById('budgetNum').value,
+    date: new Date().toISOString(),
+    fechaEmision: document.getElementById('fechaEmision').value,
+    fechaValidez: document.getElementById('fechaValidez').value,
+    provincia: document.getElementById('provincia').value,
+    taxType,
+    taxRate,
+    taxExempt,
+    empresa: {
+      nombre: document.getElementById('empNombre').value,
+      nif: document.getElementById('empNif').value,
+      direccion: document.getElementById('empDireccion').value,
+      tel: document.getElementById('empTel').value,
+      email: document.getElementById('empEmail').value,
+    },
+    cliente: {
+      nombre: document.getElementById('cliNombre').value,
+      nif: document.getElementById('cliNif').value,
+      tel: document.getElementById('cliTel').value,
+      direccion: document.getElementById('cliDireccion').value,
+      email: document.getElementById('cliEmail').value,
+    },
+    lines: JSON.parse(JSON.stringify(lines)),
+    notas: document.getElementById('notasPresupuesto').value,
+    logo: logoDataUrl,
+  };
+}
+
+function saveBudget() {
+  const data = getBudgetData();
+  if (!data.empresa.nombre) { showNotification('⚠️ Completa el nombre de la empresa', 'error'); return; }
+  if (!data.cliente.nombre) { showNotification('⚠️ Completa el nombre del cliente', 'error'); return; }
+  if (lines.length === 0) { showNotification('⚠️ Añade al menos una línea de presupuesto', 'error'); return; }
+
+  const budgets = getSavedBudgets();
+
+  if (currentBudgetIndex !== null) {
+    budgets[currentBudgetIndex] = data;
+    showNotification('✅ Presupuesto actualizado', 'success');
+  } else {
+    budgets.push(data);
+    currentBudgetIndex = budgets.length - 1;
+    showNotification('✅ Presupuesto guardado', 'success');
+  }
+
+  saveBudgets(budgets);
+  saveCompanyInfo();
+}
+
+// ============================================================
+// PDF GENERATION
+// ============================================================
+async function generatePDF() {
+  const data = getBudgetData();
+
+  if (!data.empresa.nombre) { showNotification('⚠️ Completa el nombre de la empresa', 'error'); return; }
+  if (!data.cliente.nombre) { showNotification('⚠️ Completa el nombre del cliente', 'error'); return; }
+  if (lines.length === 0) { showNotification('⚠️ Añade al menos una línea', 'error'); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const W = 210;
+  const m = 15; // margin
+  let y = m;
+
+  // Colors
+  const charcoal = [44, 40, 37];
+  const terra = [184, 114, 74];
+  const gray = [120, 110, 100];
+  const cream = [250, 248, 245];
+  const lightGray = [232, 226, 217];
+
+  // Helper
+  const line = (x1, y1, x2, y2, color = lightGray, lw = 0.3) => {
+    doc.setDrawColor(...color);
+    doc.setLineWidth(lw);
+    doc.line(x1, y1, x2, y2);
+  };
+
+  // ---- HEADER ----
+  // Background strip
+  doc.setFillColor(44, 40, 37);
+  doc.rect(0, 0, W, 38, 'F');
+
+  // Logo or company name
+  let logoW = 0;
+  if (data.logo) {
+    try {
+      const ext = data.logo.split(';')[0].split('/')[1].toUpperCase();
+      doc.addImage(data.logo, ext, m, 8, 40, 22, '', 'FAST');
+      logoW = 44;
+    } catch(e) {}
+  }
+
+  // Company name in header
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(data.empresa.nombre || 'Empresa', m + logoW, 20);
+
+  if (data.empresa.nif) {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(200, 190, 180);
+    doc.text('NIF: ' + data.empresa.nif, m + logoW, 26);
+  }
+
+  // Budget number on the right
+  doc.setFillColor(...terra);
+  doc.roundedRect(W - m - 45, 10, 45, 18, 3, 3, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PRESUPUESTO', W - m - 22.5, 18, { align: 'center' });
+  doc.setFontSize(11);
+  doc.text(data.num || '—', W - m - 22.5, 24, { align: 'center' });
+
+  y = 44;
+
+  // ---- INFO ROW ----
+  // Company & client boxes
+  const colW = (W - m * 2 - 8) / 2;
+
+  // Company box
+  doc.setFillColor(...cream);
+  doc.setDrawColor(...lightGray);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(m, y, colW, 34, 2, 2, 'FD');
+
+  doc.setTextColor(...terra);
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'bold');
+  doc.text('EMPRESA', m + 4, y + 6);
+  doc.setDrawColor(...terra);
+  doc.setLineWidth(0.5);
+  doc.line(m + 4, y + 7.5, m + 20, y + 7.5);
+
+  doc.setTextColor(...charcoal);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text(data.empresa.nombre || '', m + 4, y + 13);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...gray);
+  let empY = y + 18;
+  if (data.empresa.direccion) { doc.text(data.empresa.direccion, m + 4, empY); empY += 5; }
+  if (data.empresa.tel) { doc.text('Tel: ' + data.empresa.tel, m + 4, empY); empY += 5; }
+  if (data.empresa.email) { doc.text(data.empresa.email, m + 4, empY); }
+
+  // Client box
+  const cx = m + colW + 8;
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(...terra);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(cx, y, colW, 34, 2, 2, 'FD');
+
+  doc.setTextColor(...terra);
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CLIENTE', cx + 4, y + 6);
+  doc.line(cx + 4, y + 7.5, cx + 22, y + 7.5);
+
+  doc.setTextColor(...charcoal);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text(data.cliente.nombre || '', cx + 4, y + 13);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...gray);
+  let cliY = y + 18;
+  if (data.cliente.nif) { doc.text('NIF/DNI: ' + data.cliente.nif, cx + 4, cliY); cliY += 5; }
+  if (data.cliente.direccion) { doc.text(data.cliente.direccion, cx + 4, cliY); cliY += 5; }
+  if (data.cliente.tel) { doc.text('Tel: ' + data.cliente.tel, cx + 4, cliY); }
+
+  y += 40;
+
+  // ---- DATES ROW ----
+  const datesY = y;
+  const dateBoxW = 40;
+  const dateItems = [
+    { label: 'FECHA EMISIÓN', val: formatDate(data.fechaEmision) },
+    { label: 'VÁLIDO HASTA', val: formatDate(data.fechaValidez) },
+    { label: 'PROVINCIA', val: data.provincia || '—' },
+    { label: 'IMPUESTO', val: data.taxExempt ? 'EXENTO' : `${data.taxType} ${Math.round(data.taxRate * 100)}%` },
+  ];
+
+  dateItems.forEach((item, i) => {
+    const bx = m + i * (dateBoxW + 4);
+    doc.setFillColor(...cream);
+    doc.setDrawColor(...lightGray);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(bx, datesY, dateBoxW, 14, 2, 2, 'FD');
+    doc.setTextColor(...gray);
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text(item.label, bx + dateBoxW / 2, datesY + 5, { align: 'center' });
+    doc.setTextColor(...charcoal);
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text(item.val, bx + dateBoxW / 2, datesY + 11, { align: 'center' });
+  });
+
+  y += 20;
+
+  // ---- LINES TABLE ----
+  const tableLines = lines.map(l => [
+    l.desc,
+    l.type === 'material' ? 'Material' : 'Mano de Obra',
+    fmtNum(l.qty),
+    fmtEur(l.price),
+    fmtEur(l.total),
+  ]);
+
+  doc.autoTable({
+    startY: y,
+    head: [['Descripción', 'Tipo', 'Cantidad', 'Precio Unit.', 'Total']],
+    body: tableLines,
+    margin: { left: m, right: m },
+    headStyles: {
+      fillColor: charcoal,
+      textColor: [255, 255, 255],
+      fontSize: 8,
+      fontStyle: 'bold',
+      cellPadding: 4,
+    },
+    bodyStyles: {
+      fontSize: 9,
+      cellPadding: 4,
+      textColor: charcoal,
+    },
+    alternateRowStyles: { fillColor: cream },
+    columnStyles: {
+      0: { cellWidth: 'auto' },
+      1: { cellWidth: 32, halign: 'center' },
+      2: { cellWidth: 22, halign: 'right' },
+      3: { cellWidth: 30, halign: 'right' },
+      4: { cellWidth: 30, halign: 'right', fontStyle: 'bold' },
+    },
+    didDrawPage: (data) => {
+      y = data.cursor.y;
+    }
+  });
+
+  y = doc.lastAutoTable.finalY + 6;
+
+  // ---- TOTALS ----
+  const subtotal = lines.reduce((s, l) => s + l.total, 0);
+  const tax = data.taxExempt ? 0 : subtotal * data.taxRate;
+  const total = subtotal + tax;
+  const taxLabel = data.taxExempt ? 'Exento de Impuesto (0%)' : `${data.taxType} (${Math.round(data.taxRate * 100)}%)`;
+
+  const totW = 80;
+  const totX = W - m - totW;
+
+  // Totals box
+  doc.setFillColor(...cream);
+  doc.setDrawColor(...lightGray);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(totX - 2, y, totW + 2, 38, 2, 2, 'FD');
+
+  let ty = y + 8;
+  const drawTotalRow = (label, value, bold = false, highlight = false) => {
+    if (highlight) {
+      doc.setFillColor(...terra);
+      doc.rect(totX - 2, ty - 5, totW + 2, 10, 'F');
+      doc.setTextColor(255, 255, 255);
+    } else {
+      doc.setTextColor(...gray);
+    }
+    doc.setFontSize(bold ? 10 : 8.5);
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.text(label, totX + 4, ty);
+    doc.setTextColor(highlight ? 255 : (bold ? charcoal[0] : gray[0]),
+                     highlight ? 255 : (bold ? charcoal[1] : gray[1]),
+                     highlight ? 255 : (bold ? charcoal[2] : gray[2]));
+    doc.text(value, totX + totW - 4, ty, { align: 'right' });
+    ty += 10;
+  };
+
+  drawTotalRow('Subtotal:', fmtEur(subtotal));
+  drawTotalRow(taxLabel + ':', fmtEur(tax));
+  drawTotalRow('TOTAL:', fmtEur(total), true, true);
+
+  // ---- NOTES ----
+  if (data.notas) {
+    y += 44;
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...lightGray);
+    doc.roundedRect(m, y, W - m * 2, 4, 1, 1, 'FD');
+    doc.setTextColor(...terra);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text('NOTAS Y CONDICIONES', m + 4, y + 8);
+    line(m + 4, y + 9, m + 55, y + 9, terra);
+    doc.setTextColor(...gray);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    const notasLines = doc.splitTextToSize(data.notas, W - m * 2 - 8);
+    notasLines.forEach((notaLine, i) => {
+      doc.text(notaLine, m + 4, y + 14 + (i * 5));
+    });
+  }
+
+  // ---- FOOTER ----
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFillColor(44, 40, 37);
+    doc.rect(0, 285, W, 12, 'F');
+    doc.setTextColor(150, 140, 130);
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Presupuesto ${data.num} · Generado por PintaPro`, m, 292);
+    doc.text(`Página ${i} de ${pageCount}`, W - m, 292, { align: 'right' });
+  }
+
+  // SAVE
+  const filename = `Presupuesto_${data.num}_${(data.cliente.nombre || 'Cliente').replace(/\s+/g, '_')}.pdf`;
+  doc.save(filename);
+  showNotification('📄 PDF generado y descargado correctamente', 'success');
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// ============================================================
+// BUDGET LIST
+// ============================================================
+function showBudgetList() {
+  document.getElementById('budgetFormPanel').style.display = 'none';
+  document.getElementById('budgetListPanel').style.display = 'block';
+  renderBudgetList();
+}
+
+function renderBudgetList() {
+  const budgets = getSavedBudgets();
+  const container = document.getElementById('budgetListContent');
+
+  if (budgets.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="big-icon">📋</div>
+      <div class="fs-16 fw-500 mb-6">Sin presupuestos guardados</div>
+      <div class="color-muted">Crea tu primer presupuesto pulsando "Nuevo Presupuesto"</div>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  const listDiv = document.createElement('div');
+  listDiv.className = 'budget-list-table';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'tr-row header';
+  header.innerHTML = `<div>Nº</div><div>Cliente</div><div>Empresa</div><div class="text-right">Total</div><div class="text-center">Acciones</div>`;
+  listDiv.appendChild(header);
+
+  budgets.forEach((b, i) => {
+    const subtotal = (b.lines || []).reduce((s, l) => s + l.total, 0);
+    const tax = b.taxExempt ? 0 : subtotal * b.taxRate;
+    const total = subtotal + tax;
+
+    const row = document.createElement('div');
+    row.className = 'tr-row';
+    row.innerHTML = `
+      <div><span class="budget-badge fs-11">${escHtml(b.num || '—')}</span></div>
+      <div><strong>${escHtml(b.cliente?.nombre || '—')}</strong><br><span class="text-muted">${formatDate(b.fechaEmision)}</span></div>
+      <div>${escHtml(b.empresa?.nombre || '—')}</div>
+      <div class="text-right fw-600 color-terra">${fmtEur(total)}</div>
+      <div class="text-center flex gap-6 justify-center">
+        <button class="btn btn-secondary btn-sm" onclick="loadBudget(${i})">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteBudget(${i})">🗑️</button>
+      </div>
+    `;
+    listDiv.appendChild(row);
+  });
+
+  container.appendChild(listDiv);
+}
+
+function loadBudget(index) {
+  const budgets = getSavedBudgets();
+  const b = budgets[index];
+  currentBudgetIndex = index;
+  lines = b.lines || [];
+
+  // Populate form
+  document.getElementById('empNombre').value = b.empresa?.nombre || '';
+  document.getElementById('empNif').value = b.empresa?.nif || '';
+  document.getElementById('empDireccion').value = b.empresa?.direccion || '';
+  document.getElementById('empTel').value = b.empresa?.tel || '';
+  document.getElementById('empEmail').value = b.empresa?.email || '';
+  document.getElementById('cliNombre').value = b.cliente?.nombre || '';
+  document.getElementById('cliNif').value = b.cliente?.nif || '';
+  document.getElementById('cliTel').value = b.cliente?.tel || '';
+  document.getElementById('cliDireccion').value = b.cliente?.direccion || '';
+  document.getElementById('cliEmail').value = b.cliente?.email || '';
+  document.getElementById('budgetNum').value = b.num || '';
+  document.getElementById('budgetNumberBadge').textContent = 'Nº ' + (b.num || '—');
+  document.getElementById('fechaEmision').value = b.fechaEmision || '';
+  document.getElementById('fechaValidez').value = b.fechaValidez || '';
+  document.getElementById('notasPresupuesto').value = b.notas || '';
+  document.getElementById('taxExempt').checked = b.taxExempt || false;
+
+  if (b.logo) {
+    logoDataUrl = b.logo;
+    document.getElementById('logoPreview').innerHTML = `<img src="${logoDataUrl}" alt="Logo" /><div class="upload-hint mt-6">Haz clic para cambiar</div>`;
+  }
+
+  const provSelect = document.getElementById('provincia');
+  provSelect.value = b.provincia || '';
+  updateTax();
+
+  renderLines();
+  updateTotals();
+
+  document.getElementById('budgetFormPanel').style.display = 'block';
+  document.getElementById('budgetListPanel').style.display = 'none';
+
+  showNotification('📋 Presupuesto cargado para editar', 'success');
+}
+
+function deleteBudget(index) {
+  if (!confirm('¿Seguro que quieres eliminar este presupuesto? Esta acción no se puede deshacer.')) return;
+  const budgets = getSavedBudgets();
+  budgets.splice(index, 1);
+  saveBudgets(budgets);
+  renderBudgetList();
+  showNotification('🗑️ Presupuesto eliminado', 'success');
+}
+
+function newBudget() {
+  currentBudgetIndex = null;
+  lines = [];
+
+  // Reset form
+  ['cliNombre','cliNif','cliTel','cliDireccion','cliEmail',
+   'notasPresupuesto'].forEach(id => { document.getElementById(id).value = ''; });
+
+  loadCompanyInfo();
+
+  document.getElementById('provincia').value = '';
+  document.getElementById('taxExempt').checked = false;
+
+  const today = new Date();
+  const validity = new Date(today);
+  validity.setDate(today.getDate() + 30);
+  document.getElementById('fechaEmision').value = toISO(today);
+  document.getElementById('fechaValidez').value = toISO(validity);
+
+  const newNum = generateBudgetNumber();
+  document.getElementById('budgetNum').value = newNum;
+  document.getElementById('budgetNumberBadge').textContent = 'Nº ' + newNum;
+
+  updateTax();
+  renderLines();
+  updateTotals();
+
+  document.getElementById('budgetFormPanel').style.display = 'block';
+  document.getElementById('budgetListPanel').style.display = 'none';
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+let notifTimeout;
+function showNotification(msg, type = 'success') {
+  const el = document.getElementById('notification');
+  el.textContent = msg;
+  el.className = `notification ${type} show`;
+  clearTimeout(notifTimeout);
+  notifTimeout = setTimeout(() => { el.classList.remove('show'); }, 3000);
+}
+</script>
+</body>
+</html>
