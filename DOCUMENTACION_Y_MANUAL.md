@@ -22,6 +22,12 @@ La aplicación ahora puede instalarse en dispositivos móviles y escritorio.
 - **Service Worker:** Archivo `sw.js` implementado para el almacenamiento en caché de activos principales (`index.html`, iconos, fuentes).
 - **Modo Offline:** Permite la carga básica de la interfaz sin conexión a internet.
 
+### 1.4 Icono de Ayuda Contextual
+Se ha añadido un botón de ayuda (`?`) en la cabecera para facilitar el uso desde cualquier pantalla.
+- **Acceso rápido:** Abre un cuadro con instrucciones clave de configuración, impuestos, líneas y cierre del presupuesto.
+- **Usabilidad:** El cuadro se puede cerrar con botón, clic fuera o tecla `Esc`.
+- **Accesibilidad:** El botón incorpora `aria-label` y `title` para una mejor interacción en escritorio y móvil.
+
 ## 2. Mejoras de Código y Estándares
 - **Eliminación de Estilos Inline:** Migración de estilos `style=""` a clases de utilidad CSS para mejorar el rendimiento y la mantenibilidad.
 - **Compatibilidad con Safari:** Añadidos prefijos `-webkit-` para propiedades de diseño modernas como `backdrop-filter`.
@@ -46,3 +52,5 @@ La aplicación ahora puede instalarse en dispositivos móviles y escritorio.
 4. **Instalación como App:**
    - En móviles: Pulsa "Compartir" y luego "Añadir a la pantalla de inicio".
    - En ordenadores: Pulsa el icono de instalación en la barra de direcciones de Chrome o Edge.
+5. **Ayuda rápida:**
+   - Pulsa el icono **?** de la cabecera para abrir una guía breve dentro de la app.

@@ -151,6 +151,33 @@
   .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
   .btn-icon { padding: 7px; border-radius: 6px; }
 
+  .help-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+  }
+
+  .help-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .help-list {
+    margin: 8px 0 0 18px;
+    color: var(--charcoal2);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+  }
+
   /* MAIN LAYOUT */
   .main-container {
     max-width: 1100px;
@@ -705,6 +732,13 @@
     </div>
   </div>
   <div class="header-actions">
+    <button class="btn btn-outline help-btn" onclick="openHelpModal()" aria-label="Abrir ayuda" title="Ayuda" aria-haspopup="dialog" aria-controls="helpModal">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M9.5 9a2.5 2.5 0 1 1 4.1 1.9c-.7.6-1.6 1.1-1.6 2.1"></path>
+        <circle cx="12" cy="16.8" r="0.6"></circle>
+      </svg>
+    </button>
     <button class="btn btn-outline" onclick="showBudgetList()">📋 Mis Presupuestos</button>
     <button class="btn btn-primary" onclick="newBudget()">＋ Nuevo Presupuesto</button>
   </div>
@@ -743,6 +777,22 @@
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeLineModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveLineModal()">Guardar Línea</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AYUDA RÁPIDA -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal">
+    <h3>❓ Ayuda rápida</h3>
+    <ul class="help-list">
+      <li>Completa los datos de la empresa y del cliente.</li>
+      <li>Selecciona la provincia para aplicar IVA/IGIC/Exento automáticamente.</li>
+      <li>Añade líneas con "＋ Añadir Línea" y revisa los totales.</li>
+      <li>Guarda el presupuesto y genera el PDF cuando esté listo.</li>
+    </ul>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="closeHelpModal()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -979,7 +1029,7 @@
               </tr>
             </thead>
             <tbody id="linesBody">
-              <tr id="emptyLinesRow">
+              <tr>
                 <td colspan="7" class="text-center p-32 color-muted">
                   <div class="mb-8 fs-28">🖌️</div>
                   Añade la primera línea de presupuesto
@@ -1165,12 +1215,27 @@ function closeLineModal() {
   editingLineIndex = null;
 }
 
+function openHelpModal() {
+  document.getElementById('helpModal').classList.add('active');
+}
+
+function closeHelpModal() {
+  document.getElementById('helpModal').classList.remove('active');
+}
+
 document.getElementById('lineModal').addEventListener('click', function(e) {
   if (e.target === this) closeLineModal();
 });
 
+document.getElementById('helpModal').addEventListener('click', function(e) {
+  if (e.target === this) closeHelpModal();
+});
+
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeLineModal();
+  if (e.key === 'Escape') {
+    closeLineModal();
+    closeHelpModal();
+  }
 });
 
 function saveLineModal() {
