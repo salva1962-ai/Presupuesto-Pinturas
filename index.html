@@ -769,6 +769,7 @@
         <select id="lineType">
           <option value="material">🪣 Material</option>
           <option value="mano">👷 Mano de Obra</option>
+          <option value="completo">🎨 Material y Mano de obra incluido</option>
         </select>
       </div>
       <div class="grid-2">
@@ -1056,6 +1057,10 @@
               <label>Notas Adicionales</label>
               <textarea id="notasPresupuesto" placeholder="Condiciones de pago, plazo de ejecución, materiales incluidos/excluidos, garantías..." rows="5"></textarea>
             </div>
+            <div class="form-group mt-12">
+              <label>Condiciones de Pago</label>
+              <textarea id="condicionesPago" placeholder="EJ: Pagar por transferencia bancaria..." rows="3"></textarea>
+            </div>
           </div>
         </div>
       </div>
@@ -1140,6 +1145,11 @@ function updateTax() {
   const badge = document.getElementById('taxBadge');
   const rateInfo = document.getElementById('taxRateInfo');
   const taxRow = document.getElementById('taxRow');
+  const notas = document.getElementById('notasPresupuesto');
+
+  // Determine tax type based on province even if exempt
+  let currentTaxType = 'IVA';
+  if (CANARY_PROVINCES.includes(provincia)) currentTaxType = 'IGIC';
 
   if (exempt) {
     taxRate = 0;
@@ -1149,6 +1159,12 @@ function updateTax() {
     rateInfo.textContent = 'El presupuesto no incluirá impuesto';
     taxRow.style.opacity = '0.4';
     document.getElementById('taxRowLabel').textContent = 'Impuesto (0%)';
+
+    // Add exemption text if not already there
+    const exemptText = `Exento de ${currentTaxType} por franquicia fiscal`;
+    if (!notas.value.includes(exemptText)) {
+      notas.value = (notas.value ? notas.value + '\n' : '') + exemptText;
+    }
   } else if (!provincia) {
     taxRate = 0.21;
     taxType = 'IVA';
@@ -1284,9 +1300,14 @@ function renderLines() {
   }
 
   lines.forEach((line, i) => {
-    const typeBadge = line.type === 'material'
-      ? '<span class="type-badge material">🪣 Material</span>'
-      : '<span class="type-badge mano">👷 Mano de Obra</span>';
+    let typeBadge = '';
+    if (line.type === 'material') {
+      typeBadge = '<span class="type-badge material">🪣 Material</span>';
+    } else if (line.type === 'mano') {
+      typeBadge = '<span class="type-badge mano">👷 Mano de Obra</span>';
+    } else {
+      typeBadge = '<span class="type-badge" style="background:#EBF5FF; color:#0056B3;">🎨 Mat. y Mano</span>';
+    }
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -1373,6 +1394,7 @@ function saveCompanyInfo() {
     direccion: document.getElementById('empDireccion').value,
     tel: document.getElementById('empTel').value,
     email: document.getElementById('empEmail').value,
+    pago: document.getElementById('condicionesPago').value,
     logo: logoDataUrl
   };
   localStorage.setItem('cromahogar_company', JSON.stringify(company));
@@ -1385,6 +1407,13 @@ function loadCompanyInfo() {
   if (company.direccion) document.getElementById('empDireccion').value = company.direccion;
   if (company.tel) document.getElementById('empTel').value = company.tel;
   if (company.email) document.getElementById('empEmail').value = company.email;
+  
+  if (company.pago) {
+    document.getElementById('condicionesPago').value = company.pago;
+  } else {
+    document.getElementById('condicionesPago').value = 'Pagar por transferencia bancaria al siguiente número de cuenta ES60 0182 5222 7802 +++++ *****';
+  }
+
   if (company.logo) {
     logoDataUrl = company.logo;
     document.getElementById('logoPreview').innerHTML = `<img src="${logoDataUrl}" alt="Logo" /><div class="upload-hint mt-6">Haz clic para cambiar</div>`;
@@ -1419,6 +1448,7 @@ function getBudgetData() {
     },
     lines: JSON.parse(JSON.stringify(lines)),
     notas: document.getElementById('notasPresupuesto').value,
+    condicionesPago: document.getElementById('condicionesPago').value,
     logo: logoDataUrl,
   };
 }
@@ -1679,9 +1709,10 @@ async function generatePDF() {
   drawTotalRow(taxLabel + ':', fmtEur(tax));
   drawTotalRow('TOTAL:', fmtEur(total), true, true);
 
+  y += 44; // Mover y debajo del cuadro de totales (38mm + 6mm de margen)
+
   // ---- NOTES ----
   if (data.notas) {
-    y += 44;
     doc.setFillColor(255, 255, 255);
     doc.setDrawColor(...lightGray);
     doc.roundedRect(m, y, W - m * 2, 4, 1, 1, 'FD');
@@ -1696,6 +1727,26 @@ async function generatePDF() {
     const notasLines = doc.splitTextToSize(data.notas, W - m * 2 - 8);
     notasLines.forEach((notaLine, i) => {
       doc.text(notaLine, m + 4, y + 14 + (i * 5));
+    });
+    y += 18 + (notasLines.length * 5);
+  }
+
+  // ---- PAYMENT CONDITIONS ----
+  if (data.condicionesPago) {
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...lightGray);
+    doc.roundedRect(m, y, W - m * 2, 4, 1, 1, 'FD');
+    doc.setTextColor(...terra);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CONDICIONES DE PAGO', m + 4, y + 8);
+    line(m + 4, y + 9, m + 55, y + 9, terra);
+    doc.setTextColor(...gray);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    const pagoLines = doc.splitTextToSize(data.condicionesPago, W - m * 2 - 8);
+    pagoLines.forEach((pagoLine, i) => {
+      doc.text(pagoLine, m + 4, y + 14 + (i * 5));
     });
   }
 
@@ -1801,6 +1852,7 @@ function loadBudget(index) {
   document.getElementById('fechaEmision').value = b.fechaEmision || '';
   document.getElementById('fechaValidez').value = b.fechaValidez || '';
   document.getElementById('notasPresupuesto').value = b.notas || '';
+  document.getElementById('condicionesPago').value = b.condicionesPago || '';
   document.getElementById('taxExempt').checked = b.taxExempt || false;
 
   if (b.logo) {
@@ -1836,7 +1888,7 @@ function newBudget() {
 
   // Reset form
   ['cliNombre','cliNif','cliTel','cliDireccion','cliEmail',
-   'notasPresupuesto'].forEach(id => { document.getElementById(id).value = ''; });
+   'notasPresupuesto', 'condicionesPago'].forEach(id => { document.getElementById(id).value = ''; });
 
   loadCompanyInfo();
 
