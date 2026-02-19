@@ -1139,17 +1139,28 @@ function generateBudgetNumber() {
 // ============================================================
 function updateTax() {
   const provincia = document.getElementById('provincia').value;
-  const exempt = document.getElementById('taxExempt').checked;
-  taxExempt = exempt;
+  const exemptInput = document.getElementById('taxExempt');
+  const exempt = exemptInput.checked;
+  
+  // Advertencia si no hay provincia seleccionada
+  if (exempt && !provincia) {
+    showNotification('⚠️ Selecciona primero una provincia para aplicar la exención correcta', 'error');
+    exemptInput.checked = false;
+    taxExempt = false;
+    return;
+  }
 
+  taxExempt = exempt;
   const badge = document.getElementById('taxBadge');
   const rateInfo = document.getElementById('taxRateInfo');
   const taxRow = document.getElementById('taxRow');
   const notas = document.getElementById('notasPresupuesto');
 
-  // Determine tax type based on province even if exempt
-  let currentTaxType = 'IVA';
-  if (CANARY_PROVINCES.includes(provincia)) currentTaxType = 'IGIC';
+  // Tipos de impuestos posibles para limpiar duplicados
+  const possibleExemptTexts = [
+    'Exento de IVA por franquicia fiscal',
+    'Exento de IGIC por franquicia fiscal'
+  ];
 
   if (exempt) {
     taxRate = 0;
@@ -1160,20 +1171,37 @@ function updateTax() {
     taxRow.style.opacity = '0.4';
     document.getElementById('taxRowLabel').textContent = 'Impuesto (0%)';
 
-    // Add exemption text if not already there
+    // Determinar tipo de impuesto según provincia
+    const currentTaxType = CANARY_PROVINCES.includes(provincia) ? 'IGIC' : 'IVA';
     const exemptText = `Exento de ${currentTaxType} por franquicia fiscal`;
-    if (!notas.value.includes(exemptText)) {
-      notas.value = (notas.value ? notas.value + '\n' : '') + exemptText;
+
+    // Limpiar cualquier leyenda previa de exención para evitar duplicados
+    let nVal = notas.value;
+    possibleExemptTexts.forEach(t => {
+      nVal = nVal.replace(new RegExp(t + '\\n?', 'g'), '');
+    });
+    
+    // Añadir la leyenda correcta si no está
+    if (!nVal.includes(exemptText)) {
+      notas.value = (nVal.trim() ? nVal.trim() + '\n' : '') + exemptText;
     }
-  } else if (!provincia) {
-    taxRate = 0.21;
-    taxType = 'IVA';
-    badge.className = 'tax-badge iva';
-    badge.textContent = '— Selecciona provincia —';
-    rateInfo.textContent = '';
-    taxRow.style.opacity = '1';
-    document.getElementById('taxRowLabel').textContent = 'IVA (21%)';
-  } else if (NO_TAX_PROVINCES.includes(provincia)) {
+  } else {
+    // Si se desmarca la exención, limpiar las leyendas automáticas si existen
+    let nVal = notas.value;
+    possibleExemptTexts.forEach(t => {
+      nVal = nVal.replace(new RegExp(t + '\\n?', 'g'), '');
+    });
+    notas.value = nVal.trim();
+
+    if (!provincia) {
+      taxRate = 0.21;
+      taxType = 'IVA';
+      badge.className = 'tax-badge iva';
+      badge.textContent = '— Selecciona provincia —';
+      rateInfo.textContent = '';
+      taxRow.style.opacity = '1';
+      document.getElementById('taxRowLabel').textContent = 'IVA (21%)';
+    } else if (NO_TAX_PROVINCES.includes(provincia)) {
     taxRate = 0;
     taxType = 'EXENTO';
     badge.className = 'tax-badge exempt';
