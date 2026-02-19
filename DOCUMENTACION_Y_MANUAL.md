@@ -30,7 +30,7 @@ Se ha añadido la posibilidad de cambiar el aspecto visual de la aplicación par
   - **Tradicional:** El estilo original crema y terracota.
   - **Azul Profesional:** Un diseño limpio en tonos azules.
   - **Bosque:** Tonos verdes relajantes.
-  - **Modo Noche:** Interfaz oscura para reducir la fatiga visual.
+  - **Naranja:** Una interfaz vibrante y cálida.
 - **Persistencia:** El tema elegido se guarda automáticamente en el dispositivo.
 
 ### 1.5 Conversión a PWA (Progressive Web App)
