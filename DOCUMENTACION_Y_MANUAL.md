@@ -1,11 +1,17 @@
 # CromaHogar — Documentación Técnica de Actualizaciones
 
 **Fecha de actualización:** 19 de febrero de 2026
-**Versión del Proyecto:** 2.1.0 (PWA Ready)
+**Versión del Proyecto:** 2.1.1 (Mantenimiento y Accesibilidad)
 
 ## 1. Nuevas Funcionalidades Implementadas
 
-### 1.1 Persistencia de Datos de Empresa y Gestión de Cuentas
+### 1.1 Mantenimiento y Accesibilidad (Novedad v2.1.1)
+Se han corregido problemas de accesibilidad y optimizado el código:
+- **Accesibilidad Formulario:** Se han añadido etiquetas y nombres accesibles (`aria-label`, `title`) a los selectores que carecían de ellos, cumpliendo con los estándares WCAG.
+- **Optimización CSS:** Eliminación completa de estilos en línea (*inline styles*). Toda la lógica visual se ha movido al bloque de estilos global para mejorar el rendimiento de carga y la facilidad de mantenimiento.
+- **Mejora en PWA:** Optimización de etiquetas meta para mejorar la visualización en diferentes dispositivos móviles.
+
+### 1.2 Persistencia de Datos de Empresa y Gestión de Cuentas
 Se han implementado herramientas avanzadas para la gestión de datos recurrentes:
 - **Campos persistidos:** Nombre, NIF/CIF, Dirección, Teléfono, Email, Logotipo y **Condiciones de Pago**.
 - **Gestión de Múltiples Cuentas (Novedad):** Se ha añadido un sistema de "Favoritos" para las condiciones de pago.
