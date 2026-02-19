@@ -5,10 +5,13 @@
 
 ## 1. Nuevas Funcionalidades Implementadas
 
-### 1.1 Persistencia de Datos de Empresa y Pagos
-Se ha implementado una lógica de almacenamiento local (`localStorage`) para que el usuario no tenga que reintroducir los datos de su empresa ni sus condiciones de pago en cada sesión.
+### 1.1 Persistencia de Datos de Empresa y Gestión de Cuentas
+Se han implementado herramientas avanzadas para la gestión de datos recurrentes:
 - **Campos persistidos:** Nombre, NIF/CIF, Dirección, Teléfono, Email, Logotipo y **Condiciones de Pago**.
-- **Condiciones de Pago:** Se incluye un campo fijo editable con los datos bancarios para transferencia, que aparece automáticamente en todos los presupuestos.
+- **Gestión de Múltiples Cuentas (Novedad):** Se ha añadido un sistema de "Favoritos" para las condiciones de pago.
+  - **Botón ⭐ (Estrella):** Permite guardar la cuenta actual como favorita.
+  - **Botón 🏦 (Banco):** Abre un listado de tus cuentas guardadas para cambiar rápidamente entre ellas según el cliente o la obra.
+  - **Uso Inteligente:** Al crear un presupuesto nuevo, se carga la última cuenta utilizada, facilitando el trabajo repetitivo.
 
 ### 1.2 Sistema de Impuestos y Exenciones Inteligente
 Se ha mejorado la lógica de cálculo tributario y cumplimiento legal:
@@ -58,7 +61,7 @@ Se ha añadido un botón de ayuda (`?`) en la cabecera para facilitar el uso des
 
 1. **Configuración Inicial:** 
    - Abre la aplicación y completa "Datos de la Empresa". Estos datos se guardarán para siempre en este dispositivo.
-   - Revisa las **Condiciones de Pago** (cuenta bancaria). Lo que escribas aquí aparecerá siempre por defecto en tus nuevos presupuestos.
+   - Revisa las **Condiciones de Pago**. Si tienes varias cuentas bancarias, usa el botón ⭐ para guardarlas y el botón 🏦 para seleccionarlas en cualquier momento.
    - Sube tu logotipo (preferiblemente PNG de 300x100px).
 2. **Crear Presupuesto:**
    - Introduce los datos del cliente.

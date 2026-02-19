@@ -1113,8 +1113,20 @@
               <textarea id="notasPresupuesto" placeholder="Condiciones de pago, plazo de ejecución, materiales incluidos/excluidos, garantías..." rows="5"></textarea>
             </div>
             <div class="form-group mt-12">
-              <label>Condiciones de Pago</label>
+              <div class="flex justify-between align-center mb-6">
+                <label>Condiciones de Pago</label>
+                <div class="flex gap-4">
+                  <button type="button" class="btn btn-secondary btn-icon btn-sm" onclick="saveAsFavoritePayment()" title="Guardar esta cuenta como favorita">⭐</button>
+                  <button type="button" class="btn btn-secondary btn-icon btn-sm" onclick="togglePaymentPresets()" title="Mis cuentas guardadas">🏦</button>
+                </div>
+              </div>
               <textarea id="condicionesPago" placeholder="EJ: Pagar por transferencia bancaria..." rows="3"></textarea>
+              <div id="paymentPresets" class="mt-8 hidden" style="background: var(--cream2); padding: 12px; border-radius: 8px; border: 1px solid var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                <div class="fs-11 fw-600 mb-8 color-terra">MIS CUENTAS GUARDADAS</div>
+                <div id="paymentPresetsList" class="flex-column gap-6">
+                  <!-- Cuentas guardadas dinámicamente -->
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1194,6 +1206,78 @@ function loadTheme() {
   const savedTheme = localStorage.getItem('cromahogar_theme') || 'classic';
   document.getElementById('themeSelector').value = savedTheme;
   changeTheme(savedTheme);
+}
+
+// ============================================================
+// PAYMENT ACCOUNTS MANAGEMENT
+// ============================================================
+function togglePaymentPresets() {
+  const el = document.getElementById('paymentPresets');
+  el.classList.toggle('hidden');
+  if (!el.classList.contains('hidden')) renderPaymentPresets();
+}
+
+function saveAsFavoritePayment() {
+  const text = document.getElementById('condicionesPago').value.trim();
+  if (!text) return;
+  
+  let favorites = JSON.parse(localStorage.getItem('cromahogar_payment_favs') || '[]');
+  if (!favorites.includes(text)) {
+    favorites.push(text);
+    localStorage.setItem('cromahogar_payment_favs', JSON.stringify(favorites));
+    showNotification('⭐ Cuenta guardada en tus favoritas', 'success');
+    renderPaymentPresets();
+  } else {
+    showNotification('ℹ️ Esta cuenta ya está en tus favoritas', 'success');
+  }
+}
+
+function renderPaymentPresets() {
+  const container = document.getElementById('paymentPresetsList');
+  const favorites = JSON.parse(localStorage.getItem('cromahogar_payment_favs') || '[]');
+  
+  if (favorites.length === 0) {
+    container.innerHTML = '<div class="text-muted fs-11">No hay cuentas guardadas aún. Pulsa la estrella para añadir la actual.</div>';
+    return;
+  }
+  
+  container.innerHTML = '';
+  favorites.forEach((fav, i) => {
+    const item = document.createElement('div');
+    item.className = 'flex align-center gap-8 pb-6 border-bottom';
+    item.style.justifyContent = 'space-between';
+    
+    const textSpan = document.createElement('span');
+    textSpan.style.cursor = 'pointer';
+    textSpan.style.fontSize = '12px';
+    textSpan.style.flex = '1';
+    textSpan.textContent = fav.length > 50 ? fav.substring(0, 50) + '...' : fav;
+    textSpan.onclick = () => selectPaymentFav(i);
+    
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-danger btn-sm';
+    delBtn.style.padding = '2px 6px';
+    delBtn.innerHTML = '&times;';
+    delBtn.onclick = (e) => { e.stopPropagation(); deletePaymentFav(i); };
+
+    item.appendChild(textSpan);
+    item.appendChild(delBtn);
+    container.appendChild(item);
+  });
+}
+
+function selectPaymentFav(index) {
+  const favorites = JSON.parse(localStorage.getItem('cromahogar_payment_favs') || '[]');
+  document.getElementById('condicionesPago').value = favorites[index];
+  document.getElementById('paymentPresets').classList.add('hidden');
+  showNotification('🏦 Cuenta bancaria aplicada', 'success');
+}
+
+function deletePaymentFav(index) {
+  let favorites = JSON.parse(localStorage.getItem('cromahogar_payment_favs') || '[]');
+  favorites.splice(index, 1);
+  localStorage.setItem('cromahogar_payment_favs', JSON.stringify(favorites));
+  renderPaymentPresets();
 }
 
 function toISO(d) {
