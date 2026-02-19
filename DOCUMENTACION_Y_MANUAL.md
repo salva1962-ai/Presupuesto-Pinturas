@@ -23,13 +23,23 @@ Se ha ampliado el catálogo de tipos de línea para mayor flexibilidad:
 - **Novedad:** Añadido el tipo "Material y Mano de obra incluido".
 - **Visualización:** Identificación visual diferenciada en la tabla de presupuesto (distintivo azul).
 
-### 1.4 Conversión a PWA (Progressive Web App)
+### 1.4 Temas de Color Personalizables
+Se ha añadido la posibilidad de cambiar el aspecto visual de la aplicación para adaptarse al gusto del usuario.
+- **Selector en Header:** Un nuevo menú desplegable permite elegir entre varios estilos.
+- **Temas Disponibles:**
+  - **Tradicional:** El estilo original crema y terracota.
+  - **Azul Profesional:** Un diseño limpio en tonos azules.
+  - **Bosque:** Tonos verdes relajantes.
+  - **Modo Noche:** Interfaz oscura para reducir la fatiga visual.
+- **Persistencia:** El tema elegido se guarda automáticamente en el dispositivo.
+
+### 1.5 Conversión a PWA (Progressive Web App)
 La aplicación ahora puede instalarse en dispositivos móviles y escritorio.
 - **Manifiesto:** Archivo `manifest.json` configurado con iconos y colores corporativos.
 - **Service Worker:** Archivo `sw.js` implementado para el almacenamiento en caché de activos principales (`index.html`, iconos, fuentes).
 - **Modo Offline:** Permite la carga básica de la interfaz sin conexión a internet.
 
-### 1.4 Icono de Ayuda Contextual
+### 1.6 Icono de Ayuda Contextual
 Se ha añadido un botón de ayuda (`?`) en la cabecera para facilitar el uso desde cualquier pantalla.
 - **Acceso rápido:** Abre un cuadro con instrucciones clave de configuración, impuestos, líneas y cierre del presupuesto.
 - **Usabilidad:** El cuadro se puede cerrar con botón, clic fuera o tecla `Esc`.

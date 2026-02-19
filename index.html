@@ -35,6 +35,53 @@
     --shadow-lg: 0 8px 32px rgba(44,40,37,0.12);
   }
 
+  body.theme-blue {
+    --cream: #FAFBFD;
+    --cream2: #F0F4F8;
+    --cream3: #D9E2EC;
+    --charcoal: #102A43;
+    --charcoal2: #243B53;
+    --charcoal3: #486581;
+    --terra: #2155CD;
+    --terra-light: #5271FF;
+    --terra-pale: #E1E9FF;
+    --sage: #00796B;
+    --sage-pale: #E0F2F1;
+    --border: #BCCCDC;
+  }
+
+  body.theme-forest {
+    --cream: #FBFCFB;
+    --cream2: #F1F4F1;
+    --cream3: #E3E9E3;
+    --charcoal: #1B241B;
+    --charcoal2: #2D3A2D;
+    --charcoal3: #586958;
+    --terra: #386641;
+    --terra-light: #6A994E;
+    --terra-pale: #F2F7F2;
+    --sage: #2C5F2D;
+    --sage-pale: #97BC62;
+    --border: #CFD8CF;
+  }
+
+  body.theme-dark {
+    --cream: #1A1A1A;
+    --cream2: #242424;
+    --cream3: #333333;
+    --charcoal: #F5F5F5;
+    --charcoal2: #E0E0E0;
+    --charcoal3: #A0A0A0;
+    --terra: #F59E0B;
+    --terra-light: #FBBF24;
+    --terra-pale: #3D3D3D;
+    --sage: #10B981;
+    --sage-pale: #064E3B;
+    --border: #404040;
+    --shadow: 0 4px 20px rgba(0,0,0,0.5);
+    background: #121212;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
@@ -747,6 +794,14 @@
         <circle cx="12" cy="16.8" r="0.6"></circle>
       </svg>
     </button>
+    <div class="form-group" style="margin-bottom:0; width:130px;">
+      <select id="themeSelector" onchange="changeTheme(this.value)" class="btn btn-outline btn-sm" style="padding-right:25px; background-position: right 8px center;">
+        <option value="classic">🎨 Tradicional</option>
+        <option value="blue">💎 Azul Prof.</option>
+        <option value="forest">🌿 Bosque</option>
+        <option value="dark">🌙 Modo Noche</option>
+      </select>
+    </div>
     <button class="btn btn-outline" onclick="showBudgetList()">📋 Mis Presupuestos</button>
     <button class="btn btn-primary" onclick="newBudget()">＋ Nuevo Presupuesto</button>
   </div>
@@ -1108,6 +1163,7 @@ const NO_TAX_PROVINCES = ['Ceuta', 'Melilla'];
 // INIT
 // ============================================================
 window.addEventListener('load', () => {
+  loadTheme();
   loadCompanyInfo();
   const today = new Date();
   const validity = new Date(today);
@@ -1122,6 +1178,23 @@ window.addEventListener('load', () => {
   document.getElementById('budgetFormPanel').style.display = 'block';
   document.getElementById('budgetListPanel').style.display = 'none';
 });
+
+// ============================================================
+// THEMES
+// ============================================================
+function changeTheme(themeName) {
+  document.body.className = ''; // Limpiar temas previos
+  if (themeName !== 'classic') {
+    document.body.classList.add(`theme-${themeName}`);
+  }
+  localStorage.setItem('cromahogar_theme', themeName);
+}
+
+function loadTheme() {
+  const savedTheme = localStorage.getItem('cromahogar_theme') || 'classic';
+  document.getElementById('themeSelector').value = savedTheme;
+  changeTheme(savedTheme);
+}
 
 function toISO(d) {
   return d.toISOString().split('T')[0];
@@ -1142,7 +1215,6 @@ function updateTax() {
   const exemptInput = document.getElementById('taxExempt');
   const exempt = exemptInput.checked;
   
-  // Advertencia si no hay provincia seleccionada
   if (exempt && !provincia) {
     showNotification('⚠️ Selecciona primero una provincia para aplicar la exención correcta', 'error');
     exemptInput.checked = false;
@@ -1156,7 +1228,6 @@ function updateTax() {
   const taxRow = document.getElementById('taxRow');
   const notas = document.getElementById('notasPresupuesto');
 
-  // Tipos de impuestos posibles para limpiar duplicados
   const possibleExemptTexts = [
     'Exento de IVA por franquicia fiscal',
     'Exento de IGIC por franquicia fiscal'
@@ -1171,22 +1242,18 @@ function updateTax() {
     taxRow.style.opacity = '0.4';
     document.getElementById('taxRowLabel').textContent = 'Impuesto (0%)';
 
-    // Determinar tipo de impuesto según provincia
     const currentTaxType = CANARY_PROVINCES.includes(provincia) ? 'IGIC' : 'IVA';
     const exemptText = `Exento de ${currentTaxType} por franquicia fiscal`;
 
-    // Limpiar cualquier leyenda previa de exención para evitar duplicados
     let nVal = notas.value;
     possibleExemptTexts.forEach(t => {
       nVal = nVal.replace(new RegExp(t + '\\n?', 'g'), '');
     });
     
-    // Añadir la leyenda correcta si no está
     if (!nVal.includes(exemptText)) {
       notas.value = (nVal.trim() ? nVal.trim() + '\n' : '') + exemptText;
     }
   } else {
-    // Si se desmarca la exención, limpiar las leyendas automáticas si existen
     let nVal = notas.value;
     possibleExemptTexts.forEach(t => {
       nVal = nVal.replace(new RegExp(t + '\\n?', 'g'), '');
@@ -1202,29 +1269,30 @@ function updateTax() {
       taxRow.style.opacity = '1';
       document.getElementById('taxRowLabel').textContent = 'IVA (21%)';
     } else if (NO_TAX_PROVINCES.includes(provincia)) {
-    taxRate = 0;
-    taxType = 'EXENTO';
-    badge.className = 'tax-badge exempt';
-    badge.textContent = '⚠️ Sin impuesto (IPSI)';
-    rateInfo.textContent = 'Ceuta y Melilla no aplican IVA ni IGIC';
-    taxRow.style.opacity = '0.4';
-    document.getElementById('taxRowLabel').textContent = 'Impuesto (0%)';
-  } else if (CANARY_PROVINCES.includes(provincia)) {
-    taxRate = 0.07;
-    taxType = 'IGIC';
-    badge.className = 'tax-badge igic';
-    badge.textContent = '🌴 IGIC';
-    rateInfo.textContent = 'Islas Canarias — 7%';
-    taxRow.style.opacity = '1';
-    document.getElementById('taxRowLabel').textContent = 'IGIC (7%)';
-  } else {
-    taxRate = 0.21;
-    taxType = 'IVA';
-    badge.className = 'tax-badge iva';
-    badge.textContent = '🇪🇸 IVA';
-    rateInfo.textContent = 'Península y Baleares — 21%';
-    taxRow.style.opacity = '1';
-    document.getElementById('taxRowLabel').textContent = 'IVA (21%)';
+      taxRate = 0;
+      taxType = 'EXENTO';
+      badge.className = 'tax-badge exempt';
+      badge.textContent = '⚠️ Sin impuesto (IPSI)';
+      rateInfo.textContent = 'Ceuta y Melilla no aplican IVA ni IGIC';
+      taxRow.style.opacity = '0.4';
+      document.getElementById('taxRowLabel').textContent = 'Impuesto (0%)';
+    } else if (CANARY_PROVINCES.includes(provincia)) {
+      taxRate = 0.07;
+      taxType = 'IGIC';
+      badge.className = 'tax-badge igic';
+      badge.textContent = '🌴 IGIC';
+      rateInfo.textContent = 'Islas Canarias — 7%';
+      taxRow.style.opacity = '1';
+      document.getElementById('taxRowLabel').textContent = 'IGIC (7%)';
+    } else {
+      taxRate = 0.21;
+      taxType = 'IVA';
+      badge.className = 'tax-badge iva';
+      badge.textContent = '🇪🇸 IVA';
+      rateInfo.textContent = 'Península y Baleares — 21%';
+      taxRow.style.opacity = '1';
+      document.getElementById('taxRowLabel').textContent = 'IVA (21%)';
+    }
   }
 
   updateTotals();
